@@ -6,7 +6,7 @@ import { EmptyState, Field, StatCard } from '../../components/ui'
 import { useToast } from '../../components/Toast'
 import LancamentoLista from '../../components/LancamentoLista'
 
-const filtrosVazios = { de: '', ate: '', tipo: '', categoria: '', status: '', funcionario: '', busca: '' }
+const filtrosVazios = { de: '', ate: '', tipo: '', categoria: '', status: '', funcionario: '', fornecedor: '', busca: '' }
 
 export default function ExtratoTab({ obra, lancamentos, equipe }) {
   const toast = useToast()
@@ -24,8 +24,9 @@ export default function ExtratoTab({ obra, lancamentos, equipe }) {
           if (f.categoria && l.categoria !== f.categoria) return false
           if (f.status && l.status !== f.status) return false
           if (f.funcionario && l.funcionarios?.id !== f.funcionario) return false
+          if (f.fornecedor && l.fornecedores?.id !== f.fornecedor) return false
           if (f.busca) {
-            const txt = [l.descricao, l.fornecedor, l.funcionarios?.nome, l.notas?.numero].join(' ').toLowerCase()
+            const txt = [l.descricao, l.fornecedor, l.fornecedores?.nome, l.funcionarios?.nome, l.notas?.numero].join(' ').toLowerCase()
             if (!txt.includes(f.busca.toLowerCase())) return false
           }
           return true
@@ -33,6 +34,10 @@ export default function ExtratoTab({ obra, lancamentos, equipe }) {
         .sort((a, b) => a.data.localeCompare(b.data)),
     [lancamentos, f],
   )
+
+  // fornecedores que aparecem nos lançamentos desta obra
+  const fornecedores = [...new Map(lancamentos.filter((l) => l.fornecedores).map((l) => [l.fornecedores.id, l.fornecedores.nome])).entries()]
+    .sort((a, b) => a[1].localeCompare(b[1]))
 
   const soma = (fn) => linhas.filter(fn).reduce((s, l) => s + Number(l.valor), 0)
   const entradas = soma((l) => l.tipo === 'entrada' && l.status === 'pago')
@@ -45,6 +50,7 @@ export default function ExtratoTab({ obra, lancamentos, equipe }) {
     if (f.categoria) p.push(TODAS_CATEGORIAS[f.categoria])
     if (f.status) p.push(f.status === 'pago' ? 'pagos' : 'pendentes')
     if (f.funcionario) p.push(`funcionário ${equipe.find((e) => e.funcionario_id === f.funcionario)?.funcionarios?.nome ?? ''}`)
+    if (f.fornecedor) p.push(`fornecedor ${fornecedores.find(([id]) => id === f.fornecedor)?.[1] ?? ''}`)
     if (f.busca) p.push(`busca "${f.busca}"`)
     return p.length ? p.join(' · ') : 'todos os lançamentos'
   }
@@ -66,7 +72,7 @@ export default function ExtratoTab({ obra, lancamentos, equipe }) {
   return (
     <>
       <div className="card mb-4 p-4">
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-7">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
           <Field label="De"><input type="date" className="input" value={f.de} onChange={set('de')} /></Field>
           <Field label="Até"><input type="date" className="input" value={f.ate} onChange={set('ate')} /></Field>
           <Field label="Tipo">
@@ -95,7 +101,13 @@ export default function ExtratoTab({ obra, lancamentos, equipe }) {
               {equipe.map(({ funcionarios: fu }) => fu && <option key={fu.id} value={fu.id}>{fu.nome}</option>)}
             </select>
           </Field>
-          <Field label="Buscar" className="col-span-2 md:col-span-2 xl:col-span-1">
+          <Field label="Fornecedor">
+            <select className="input" value={f.fornecedor} onChange={set('fornecedor')}>
+              <option value="">Todos</option>
+              {fornecedores.map(([id, nome]) => <option key={id} value={id}>{nome}</option>)}
+            </select>
+          </Field>
+          <Field label="Buscar">
             <input className="input" placeholder="Descrição, fornecedor…" value={f.busca} onChange={set('busca')} />
           </Field>
         </div>

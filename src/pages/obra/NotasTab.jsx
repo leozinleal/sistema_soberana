@@ -6,8 +6,9 @@ import { date, money, today } from '../../lib/format'
 import { abrirArquivo, removerArquivo, uploadArquivo } from '../../lib/storage'
 import { ConfirmButton, EmptyState, Field, FileInput, Modal, StatCard } from '../../components/ui'
 import { useToast } from '../../components/Toast'
+import { FornecedorSelect } from '../Fornecedores'
 
-const vazio = { numero: '', fornecedor: '', cnpj_fornecedor: '', descricao: '', valor: '', data_emissao: today() }
+const vazio = { numero: '', fornecedor_id: '', descricao: '', valor: '', data_emissao: today() }
 
 function NotaModal({ open, onClose, obraId, nota, onSaved }) {
   const toast = useToast()
@@ -31,7 +32,7 @@ function NotaModal({ open, onClose, obraId, nota, onSaved }) {
     e.preventDefault()
     setSalvando(true)
     try {
-      const dados = { ...form, obra_id: obraId, valor: Number(form.valor) }
+      const dados = { ...form, obra_id: obraId, valor: Number(form.valor), fornecedor_id: form.fornecedor_id || null }
       if (arquivo) {
         const up = await uploadArquivo(obraId, 'notas', arquivo)
         dados.arquivo_path = up.path
@@ -43,7 +44,7 @@ function NotaModal({ open, onClose, obraId, nota, onSaved }) {
       if (nota?.id) {
         unwrap(await supabase.from('notas').update(dados).eq('id', nota.id))
         // mantém o gasto ligado à nota com os mesmos dados
-        const upd = { valor: dados.valor, data: dados.data_emissao, fornecedor: dados.fornecedor || null, descricao }
+        const upd = { valor: dados.valor, data: dados.data_emissao, fornecedor_id: dados.fornecedor_id, descricao }
         if (dados.arquivo_path) Object.assign(upd, { comprovante_path: dados.arquivo_path, comprovante_nome: dados.arquivo_nome })
         unwrap(await supabase.from('lancamentos').update(upd).eq('nota_id', nota.id))
       } else {
@@ -58,7 +59,7 @@ function NotaModal({ open, onClose, obraId, nota, onSaved }) {
               descricao,
               valor: dados.valor,
               data: dados.data_emissao,
-              fornecedor: dados.fornecedor || null,
+              fornecedor_id: dados.fornecedor_id,
               nota_id: salva.id,
               comprovante_path: dados.arquivo_path ?? null,
               comprovante_nome: dados.arquivo_nome ?? null,
@@ -98,14 +99,11 @@ function NotaModal({ open, onClose, obraId, nota, onSaved }) {
         <Field label="Data de emissão">
           <input className="input" type="date" required value={form.data_emissao} onChange={set('data_emissao')} />
         </Field>
-        <Field label="Número da nota">
+        <Field label="Número da nota" className="sm:col-span-2">
           <input className="input" value={form.numero} onChange={set('numero')} />
         </Field>
-        <Field label="CNPJ do fornecedor">
-          <input className="input" value={form.cnpj_fornecedor} onChange={set('cnpj_fornecedor')} />
-        </Field>
-        <Field label="Fornecedor" className="sm:col-span-2">
-          <input className="input" placeholder="Ex.: Madeireira X" value={form.fornecedor} onChange={set('fornecedor')} />
+        <Field label="Fornecedor *" className="sm:col-span-2">
+          <FornecedorSelect required value={form.fornecedor_id} onChange={(v) => setForm((f) => ({ ...f, fornecedor_id: v }))} />
         </Field>
         <Field label="O que foi comprado" className="sm:col-span-2">
           <input className="input" placeholder="Ex.: Tijolos, cimento, ferragem" value={form.descricao} onChange={set('descricao')} />
@@ -171,7 +169,7 @@ export default function NotasTab({ obra, notas, recarregar }) {
             <div key={n.id} className="card p-4">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <p className="truncate font-bold">{n.fornecedor || 'Fornecedor não informado'}</p>
+                  <p className="truncate font-bold">{n.fornecedores?.nome || n.fornecedor || 'Fornecedor não informado'}</p>
                   <p className="text-xs text-zinc-500">NF {n.numero || 's/n'} · {date(n.data_emissao)}</p>
                 </div>
                 <p className="shrink-0 text-lg font-extrabold">{money(n.valor)}</p>

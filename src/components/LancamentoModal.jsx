@@ -5,6 +5,7 @@ import { today } from '../lib/format'
 import { uploadArquivo, removerArquivo } from '../lib/storage'
 import { Field, FileInput, Modal } from './ui'
 import { useToast } from './Toast'
+import { FornecedorSelect } from '../pages/Fornecedores'
 
 const vazio = (tipo = 'saida') => ({
   tipo,
@@ -16,6 +17,7 @@ const vazio = (tipo = 'saida') => ({
   vencimento: '',
   forma_pagamento: 'PIX',
   fornecedor: '',
+  fornecedor_id: '',
   funcionario_id: '',
 })
 
@@ -58,7 +60,8 @@ export default function LancamentoModal({ open, onClose, obraId, lancamento, pre
         status: form.status,
         vencimento: form.status === 'pendente' && form.vencimento ? form.vencimento : null,
         forma_pagamento: form.forma_pagamento || null,
-        fornecedor: form.fornecedor || null,
+        fornecedor: form.tipo === 'entrada' || !form.fornecedor_id ? form.fornecedor || null : null,
+        fornecedor_id: form.tipo === 'saida' && form.categoria !== 'mao_de_obra' && form.fornecedor_id ? form.fornecedor_id : null,
         funcionario_id: form.categoria === 'mao_de_obra' && form.funcionario_id ? form.funcionario_id : null,
       }
       if (arquivo) {
@@ -164,9 +167,14 @@ export default function LancamentoModal({ open, onClose, obraId, lancamento, pre
             </select>
           </Field>
         )}
-        {!ehFuncionario && (
-          <Field label={form.tipo === 'entrada' ? 'Pagador' : 'Fornecedor / prestador'} className="sm:col-span-2">
+        {form.tipo === 'entrada' && (
+          <Field label="Pagador" className="sm:col-span-2">
             <input className="input" value={form.fornecedor} onChange={set('fornecedor')} />
+          </Field>
+        )}
+        {form.tipo === 'saida' && !ehFuncionario && (
+          <Field label="Fornecedor / prestador" className="sm:col-span-2">
+            <FornecedorSelect value={form.fornecedor_id} onChange={(v) => setForm((f) => ({ ...f, fornecedor_id: v }))} />
           </Field>
         )}
         <Field label="Comprovante" className="sm:col-span-2">

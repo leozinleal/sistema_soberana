@@ -1,11 +1,12 @@
 import { NavLink, Outlet } from 'react-router-dom'
-import { Building2, HardHat, LayoutDashboard, LogOut, Users } from 'lucide-react'
+import { Building2, HardHat, LayoutDashboard, LogOut, Truck, Users } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 
 const links = [
   { to: '/', label: 'Painel', icon: LayoutDashboard, end: true },
   { to: '/obras', label: 'Obras', icon: Building2 },
   { to: '/funcionarios', label: 'Funcionários', icon: HardHat },
+  { to: '/fornecedores', label: 'Fornecedores', icon: Truck },
   { to: '/clientes', label: 'Clientes', icon: Users },
 ]
 
@@ -64,19 +65,19 @@ export default function Layout() {
       </main>
 
       {/* Menu inferior (celular) */}
-      <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-4 border-t border-zinc-200 bg-white pb-[env(safe-area-inset-bottom)] lg:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-zinc-200 bg-white pb-[env(safe-area-inset-bottom)] lg:hidden">
         {links.map(({ to, label, icon: Icon, end }) => (
           <NavLink
             key={to}
             to={to}
             end={end}
             className={({ isActive }) =>
-              `flex flex-col items-center gap-1 py-2.5 text-[11px] font-semibold ${isActive ? 'text-ink' : 'text-zinc-400'}`
+              `flex flex-col items-center gap-1 py-2.5 text-[10px] font-semibold ${isActive ? 'text-ink' : 'text-zinc-400'}`
             }
           >
             {({ isActive }) => (
               <>
-                <span className={`rounded-full px-4 py-1 ${isActive ? 'bg-brand' : ''}`}>
+                <span className={`rounded-full px-3 py-1 ${isActive ? 'bg-brand' : ''}`}>
                   <Icon className="h-5 w-5" />
                 </span>
                 {label}

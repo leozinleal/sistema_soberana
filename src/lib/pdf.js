@@ -87,7 +87,7 @@ export async function gerarExtratoPDF(obra, linhas, descFiltros) {
     head: [['Data', 'Descrição', 'Categoria', 'Situação', 'Entrada', 'Saída']],
     body: linhas.map((l) => [
       date(l.data),
-      [l.descricao, l.funcionarios?.nome && `Func.: ${l.funcionarios.nome}`, l.fornecedor && `Forn.: ${l.fornecedor}`, l.notas?.numero && !l.descricao.startsWith('NF') && `NF ${l.notas.numero}`]
+      [l.descricao, l.funcionarios?.nome && `Func.: ${l.funcionarios.nome}`, (l.fornecedores?.nome ?? l.fornecedor) && `Forn.: ${l.fornecedores?.nome ?? l.fornecedor}`, l.notas?.numero && !l.descricao.startsWith('NF') && `NF ${l.notas.numero}`]
         .filter(Boolean)
         .join('\n'),
       TODAS_CATEGORIAS[l.categoria] ?? l.categoria,

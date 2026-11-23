@@ -167,6 +167,11 @@ begin
   end loop;
 end $$;
 
+-- Permissões de acesso pela API para usuários logados
+grant usage on schema public to authenticated;
+grant select, insert, update, delete on all tables in schema public to authenticated;
+grant select on public.obras_resumo to authenticated;
+
 -- ---------------------------------------------------------------------
 -- STORAGE: bucket privado para notas, comprovantes e documentos
 -- ---------------------------------------------------------------------
@@ -187,3 +192,35 @@ create policy "arquivos_autenticado_update" on storage.objects
   for update to authenticated using (bucket_id = 'arquivos');
 create policy "arquivos_autenticado_delete" on storage.objects
   for delete to authenticated using (bucket_id = 'arquivos');
+
+-- ---------------------------------------------------------------------
+-- FORNECEDORES
+-- ---------------------------------------------------------------------
+create table if not exists public.fornecedores (
+  id           uuid primary key default gen_random_uuid(),
+  nome         text not null,
+  cnpj_cpf     text,
+  ramo         text,            -- ex.: material de construção, elétrica, locação
+  telefone     text,
+  email        text,
+  chave_pix    text,
+  endereco     text,
+  observacoes  text,
+  ativo        boolean not null default true,
+  created_at   timestamptz not null default now()
+);
+
+alter table public.notas
+  add column if not exists fornecedor_id uuid references public.fornecedores(id) on delete set null;
+alter table public.lancamentos
+  add column if not exists fornecedor_id uuid references public.fornecedores(id) on delete set null;
+
+create index if not exists notas_fornecedor_idx on public.notas (fornecedor_id);
+create index if not exists lancamentos_fornecedor_idx on public.lancamentos (fornecedor_id);
+
+-- Segurança
+alter table public.fornecedores enable row level security;
+drop policy if exists "acesso_autenticado" on public.fornecedores;
+create policy "acesso_autenticado" on public.fornecedores
+  for all to authenticated using (true) with check (true);
+grant select, insert, update, delete on public.fornecedores to authenticated;
