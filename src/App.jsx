@@ -7,6 +7,7 @@ import Obras from './pages/Obras'
 import ObraDetalhe from './pages/ObraDetalhe'
 import Clientes from './pages/Clientes'
 import Funcionarios from './pages/Funcionarios'
+import Fornecedores from './pages/Fornecedores'
 import { Spinner } from './components/ui'
 
 function Protegido({ children }) {
@@ -30,6 +31,7 @@ export default function App() {
         <Route index element={<Painel />} />
         <Route path="obras" element={<Obras />} />
         <Route path="obras/:id/:aba?" element={<ObraDetalhe />} />
+        <Route path="fornecedores" element={<Fornecedores />} />
         <Route path="clientes" element={<Clientes />} />
         <Route path="funcionarios" element={<Funcionarios />} />
       </Route>

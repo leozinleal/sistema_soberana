@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Paperclip, X } from 'lucide-react'
 
 export function Spinner({ className = '' }) {
@@ -67,20 +68,28 @@ export function StatCard({ label, value, hint, tone = 'default' }) {
   )
 }
 
+const pilhaModais = []
+
 export function Modal({ open, onClose, title, children, footer, wide = false }) {
+  const fechar = useRef(onClose)
+  fechar.current = onClose
   useEffect(() => {
     if (!open) return
-    const esc = (e) => e.key === 'Escape' && onClose()
+    const id = Symbol()
+    pilhaModais.push(id)
+    // Esc fecha só a janela que está por cima
+    const esc = (e) => e.key === 'Escape' && pilhaModais.at(-1) === id && fechar.current()
     document.addEventListener('keydown', esc)
     document.body.style.overflow = 'hidden'
     return () => {
       document.removeEventListener('keydown', esc)
-      document.body.style.overflow = ''
+      pilhaModais.splice(pilhaModais.indexOf(id), 1)
+      if (!pilhaModais.length) document.body.style.overflow = ''
     }
-  }, [open, onClose])
+  }, [open])
 
   if (!open) return null
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 sm:items-center sm:p-4" onMouseDown={onClose}>
       <div
         className={`flex max-h-[92vh] w-full flex-col rounded-t-3xl bg-white shadow-xl sm:rounded-3xl ${wide ? 'sm:max-w-3xl' : 'sm:max-w-lg'}`}
@@ -95,7 +104,8 @@ export function Modal({ open, onClose, title, children, footer, wide = false }) 
         <div className="overflow-y-auto px-5 py-4">{children}</div>
         {footer && <div className="flex justify-end gap-2 border-t border-zinc-100 px-5 py-4">{footer}</div>}
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
 

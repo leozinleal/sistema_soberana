@@ -33,8 +33,8 @@ export default function ObraDetalhe() {
   const carregar = useCallback(async () => {
     const [o, l, n, d, e] = await Promise.all([
       supabase.from('obras').select('*, clientes(*)').eq('id', id).single(),
-      supabase.from('lancamentos').select('*, funcionarios(id, nome), notas(id, numero)').eq('obra_id', id).order('data', { ascending: false }).order('created_at', { ascending: false }),
-      supabase.from('notas').select('*, lancamentos(id)').eq('obra_id', id).order('data_emissao', { ascending: false }),
+      supabase.from('lancamentos').select('*, funcionarios(id, nome), fornecedores(id, nome), notas(id, numero)').eq('obra_id', id).order('data', { ascending: false }).order('created_at', { ascending: false }),
+      supabase.from('notas').select('*, lancamentos(id), fornecedores(id, nome)').eq('obra_id', id).order('data_emissao', { ascending: false }),
       supabase.from('documentos').select('*').eq('obra_id', id).order('created_at', { ascending: false }),
       supabase.from('obra_funcionarios').select('*, funcionarios(*)').eq('obra_id', id),
     ])

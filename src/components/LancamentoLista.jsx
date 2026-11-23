@@ -21,7 +21,7 @@ export default function LancamentoLista({ itens, onEditar, onExcluir }) {
     )
   const Detalhe = ({ l }) => (
     <span className="text-xs text-zinc-500">
-      {[TODAS_CATEGORIAS[l.categoria], l.funcionarios?.nome, l.fornecedor, l.notas?.numero && `NF ${l.notas.numero}`].filter(Boolean).join(' · ')}
+      {[TODAS_CATEGORIAS[l.categoria], l.funcionarios?.nome, l.fornecedores?.nome ?? l.fornecedor, l.notas?.numero && `NF ${l.notas.numero}`].filter(Boolean).join(' · ')}
     </span>
   )
   const Acoes = ({ l }) => (

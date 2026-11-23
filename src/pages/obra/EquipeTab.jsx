@@ -17,7 +17,7 @@ function VincularModal({ open, onClose, obraId, jaVinculados, onSaved }) {
   const [novo, setNovo] = useState(false)
 
   const carregar = () =>
-    supabase.from('funcionarios').select('*').eq('ativo', true).order('nome').then(({ data }) => setTodos(data ?? []))
+    supabase.from('funcionarios').select('*').order('nome').then(({ data }) => setTodos(data ?? []))
 
   useEffect(() => {
     if (open) { carregar(); setFuncId(''); setFuncao('') }
@@ -31,6 +31,10 @@ function VincularModal({ open, onClose, obraId, jaVinculados, onSaved }) {
       obra_id: obraId, funcionario_id: funcId, funcao_na_obra: funcao || null, data_inicio: today(),
     })
     if (error) return toast(error.message, 'erro')
+    // se estava inativo, volta a ficar ativo ao entrar numa obra
+    if (todos.find((f) => f.id === funcId)?.ativo === false) {
+      await supabase.from('funcionarios').update({ ativo: true }).eq('id', funcId)
+    }
     toast('Funcionário vinculado à obra')
     onSaved()
     onClose()
@@ -54,7 +58,7 @@ function VincularModal({ open, onClose, obraId, jaVinculados, onSaved }) {
             <div className="flex gap-2">
               <select className="input" required value={funcId} onChange={(e) => setFuncId(e.target.value)}>
                 <option value="">Selecione…</option>
-                {disponiveis.map((f) => <option key={f.id} value={f.id}>{f.nome}{f.funcao ? ` — ${f.funcao}` : ''}</option>)}
+                {disponiveis.map((f) => <option key={f.id} value={f.id}>{f.nome}{f.funcao ? ` — ${f.funcao}` : ''}{f.ativo ? '' : ' (inativo)'}</option>)}
               </select>
               <button type="button" className="btn-outline !px-3" title="Cadastrar novo" onClick={() => setNovo(true)}>
                 <Plus className="h-4 w-4" />
