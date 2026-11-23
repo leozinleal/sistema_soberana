@@ -28,9 +28,16 @@ cp .env.example .env      # preencha com Project URL e anon key (Project Setting
 npm run dev               # abre em http://localhost:5173
 ```
 
-### 3. Publicar
-`npm run build` gera a pasta `dist/`. Pode subir na Vercel/Netlify (configure as duas variáveis
-`VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY`) ou na sua VPS com Nginx, redirecionando todas as rotas para o `index.html`.
+### 3. Publicar (Cloudflare Pages — gratuito, permite uso comercial)
+1. Em https://dash.cloudflare.com → **Workers & Pages → Create → Pages → Connect to Git**, escolha este repositório
+2. Configuração de build: **Framework preset** `React (Vite)` · **Build command** `npm run build` · **Output directory** `dist`
+3. Em **Environment variables**, adicione `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY`
+4. **Save and Deploy**. A cada Merge na `main` o site atualiza sozinho.
+
+O Cloudflare Pages já devolve o `index.html` para qualquer rota (sistema de página única), então atualizar a página dentro de uma obra funciona sem configuração extra.
+
+## Anexos
+Fotos (JPG/PNG/WEBP) são reduzidas automaticamente antes do envio (lado maior até 2000 px, JPEG 80%), o que costuma levar uma foto de 3 MB para menos de 500 KB. PDFs são enviados como estão. Limite de 50 MB por arquivo (plano gratuito do Supabase).
 
 ## Estrutura
 
